@@ -67,11 +67,16 @@ header p{margin:0;color:var(--soft)}
 .final .b{font:400 clamp(22px,6vw,30px)/1.6 "Aref Ruqaa",serif;color:var(--blush);margin:6px 0 0}
 footer{text-align:center;margin-top:40px;color:var(--soft);font-size:16px}
 footer .h{font-size:28px;color:var(--rose);display:inline-block;animation:beat 1.6s infinite}
+#yt{position:fixed;width:2px;height:2px;left:0;bottom:0;opacity:0;pointer-events:none}
+#mus{position:fixed;z-index:4;bottom:18px;left:18px;width:54px;height:54px;border-radius:50%;border:1px solid rgba(255,140,165,.5);background:rgba(58,12,25,.8);color:var(--rose);font-size:24px;cursor:pointer;display:none;place-items:center;box-shadow:0 0 20px rgba(255,92,122,.4)}
+#mus.on{display:grid}#mus.playing{animation:beat 1.6s infinite}#mus:focus-visible{outline:2px dashed var(--blush);outline-offset:4px}
 @media(prefers-reduced-motion:reduce){.fh{display:none}.seal button,footer .h{animation:none}.names li,.prose p{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body>
 <div id="hearts" aria-hidden="true"></div>
+<div id="yt"></div>
+<button id="mus" aria-label="تشغيل/إيقاف الأغنية">♫</button>
 
 <div id="cover">
   <div class="seal">
@@ -128,6 +133,15 @@ const names=["حبيبتي","وأميرتي","ومليكتي","وعشيقتي","
 const ul=document.getElementById('names');
 ul.innerHTML=names.map(n=>`<li>${n}</li>`).join('');
 
+
+const VID='VZYyEhMhtqY',START=7;
+let player=null,ready=false,want=false;
+window.onYouTubeIframeAPIReady=()=>{player=new YT.Player('yt',{videoId:VID,playerVars:{start:START,playsinline:1,controls:0,rel:0},events:{
+  onReady:()=>{ready=true;if(want){player.seekTo(START,true);player.playVideo()}},
+  onStateChange:e=>{const m=document.getElementById('mus');m.classList.toggle('playing',e.data===1);if(e.data===0){player.seekTo(START,true);player.playVideo()}}}})};
+const tag=document.createElement('script');tag.src='https://www.youtube.com/iframe_api';document.head.appendChild(tag);
+function playMusic(){want=true;if(ready){player.seekTo(START,true);player.playVideo()}}
+document.getElementById('mus').addEventListener('click',()=>{if(!ready)return;player.getPlayerState()===1?player.pauseVideo():player.playVideo()});
 const box=document.getElementById('hearts');
 const glyphs=['❤','♡','❥','💗','♥'];
 function spawn(){
@@ -148,6 +162,7 @@ function reveal(){
   document.querySelectorAll('#prose p').forEach(p=>io.observe(p));
 }
 document.getElementById('open').addEventListener('click',()=>{
+  playMusic();document.getElementById('mus').classList.add('on');
   document.getElementById('cover').classList.add('gone');
   if(!reduce)for(let i=0;i<25;i++)setTimeout(spawn,i*60);
   reveal();
