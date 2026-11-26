@@ -138,17 +138,20 @@ const ul=document.getElementById('names');
 ul.innerHTML=names.map(n=>`<li>${n}</li>`).join('');
 
 
-const VID='VZYyEhMhtqY',START=7;
+const VIDS=[['9Sc1qXdbH40',0],['VZYyEhMhtqY',7]];let vi=0;
+const cur=()=>VIDS[vi][0],START_=()=>VIDS[vi][1];
 let player=null,ready=false,want=false,failed=false;
 const ytbox=document.getElementById('ytbox'),mus=document.getElementById('mus'),note=document.getElementById('ytnote');
 const showBox=()=>ytbox.classList.add('show'),hideBox=()=>ytbox.classList.remove('show');
-function fallback(){failed=true;note.innerHTML='الأغنية مش راضية تشتغل هنا ♡ <a href="https://www.youtube.com/watch?v='+VID+'&t='+START+'s" target="_blank" rel="noopener">اسمعيها من يوتيوب</a>';document.getElementById('ytwrap').style.display='none';showBox()}
-window.onYouTubeIframeAPIReady=()=>{player=new YT.Player('yt',{videoId:VID,playerVars:{start:START,playsinline:1,rel:0,modestbranding:1},events:{
+function fallback(){failed=true;document.getElementById('ytwrap').innerHTML='<iframe src="https://open.spotify.com/embed/track/5kSZ7WdHUAcq1XsYImlC7D?utm_source=generator&theme=0" allow="autoplay; clipboard-write; encrypted-media" loading="lazy" style="border:0"></iframe>';
+  note.innerHTML='دوسي ▶ ♡ أو <a href="https://www.youtube.com/watch?v=VZYyEhMhtqY&t=7s" target="_blank" rel="noopener">اسمعيها من يوتيوب</a>';showBox()}
+function onErr(){if(vi<VIDS.length-1){vi++;player.loadVideoById({videoId:cur(),startSeconds:START_()});setTimeout(()=>{if(!failed&&player.getPlayerState?.()!==1)showBox()},1500)}else fallback()}
+window.onYouTubeIframeAPIReady=()=>{player=new YT.Player('yt',{videoId:cur(),playerVars:{start:START_(),playsinline:1,rel:0,modestbranding:1},events:{
   onReady:()=>{ready=true;if(want)tryPlay()},
-  onError:fallback,
-  onStateChange:e=>{const on=e.data===1;mus.classList.toggle('playing',on);if(on)setTimeout(hideBox,600);if(e.data===0){player.seekTo(START,true);player.playVideo()}}}})};
+  onError:onErr,
+  onStateChange:e=>{const on=e.data===1;mus.classList.toggle('playing',on);if(on)setTimeout(hideBox,600);if(e.data===0){player.seekTo(START_(),true);player.playVideo()}}}})};
 const tag=document.createElement('script');tag.src='https://www.youtube.com/iframe_api';document.head.appendChild(tag);
-function tryPlay(){try{player.seekTo(START,true);player.playVideo()}catch(_){}
+function tryPlay(){try{player.seekTo(START_(),true);player.playVideo()}catch(_){}
   setTimeout(()=>{if(!failed&&(!player||player.getPlayerState?.()!==1))showBox()},1800)}
 function playMusic(){want=true;if(ready)tryPlay();else setTimeout(()=>{if(!ready&&!failed)showBox()},4000)}
 mus.addEventListener('click',()=>{if(failed||!ready){showBox();return}
